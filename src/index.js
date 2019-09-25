@@ -1,10 +1,25 @@
-const app = require('fastify')({ logger: true });
-const { ApolloServer, gql } = require('apollo-server-fastify');
-const typeDefs = require('./schema');
+import 'dotenv/config';
+import cors from 'fastify-cors';
+import helmet from 'fastify-helmet';
+import { ApolloServer } from 'apollo-server-fastify';
+import typeDefs from './schema';
+import resolvers from './resolvers';
+import models from './models';
 
-const server = new ApolloServer({ typeDefs });
+const fastify = require('fastify')({ logger: true });
 
-(async function() {
-  app.register(server.createHandler());
-  await app.listen(3000);
-})();
+fastify.register(cors);
+fastify.register(helmet);
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: { models, me: models.users[1] },
+});
+
+async function serve() {
+  fastify.register(server.createHandler());
+  await fastify.listen(3000);
+}
+
+serve();
