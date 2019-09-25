@@ -1,38 +1,19 @@
 import { gql } from 'apollo-server-fastify';
+import userSchema from './user';
+import productSchema from './product';
 
-const schema = gql`
+const linkSchema = gql`
   type Query {
-    users: [User!]
-    user(id: ID!): User
-    me: User
-
-    products: [Product!]!
-    product(id: ID!): Product!
-  }
-
-  type User {
-    id: ID!
-    email: String!
-    password: String!
-    products: [Product!]
-  }
-
-  type Product {
-    id: ID!
-    title: String!
-    user: User!
-    description: String
-    shopifyId: Int
-    tags: [String]
-    type: String
-    vendor: String
+    _: Boolean
   }
 
   type Mutation {
-    login(email: String): String # login token
-    createProduct(title: String!): Product!
-    deleteProduct(id: ID!) Boolean!
+    _: Boolean
+  }
+
+  type Subscription {
+    _: Boolean
   }
 `;
 
-export default schema;
+export default [linkSchema, userSchema, productSchema];
