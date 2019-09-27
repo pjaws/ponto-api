@@ -12,11 +12,21 @@ const user = (sequelize, DataTypes) => {
       unique: true,
       validate: {
         isEmail: true,
+        notEmpty: {
+          args: true,
+          msg: `Email can't be empty.`,
+        },
       },
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: `Password can't be empty.`,
+        },
+      },
     },
     firstName: {
       type: DataTypes.STRING,

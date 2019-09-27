@@ -9,10 +9,22 @@ const product = (sequelize, DataTypes) => {
     title: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: `Title can't be empty.`,
+        },
+      },
     },
     sku: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: `SKU can't be empty.`,
+        },
+      },
     },
     description: DataTypes.TEXT,
     price: DataTypes.DECIMAL(2),
