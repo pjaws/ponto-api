@@ -4,7 +4,7 @@ import helmet from 'fastify-helmet';
 import { ApolloServer } from 'apollo-server-fastify';
 import typeDefs from './schema';
 import resolvers from './resolvers';
-import models from './models';
+import models, { sequelize } from './models';
 
 const fastify = require('fastify')({ logger: true });
 
@@ -22,4 +22,6 @@ async function serve() {
   await fastify.listen(3000);
 }
 
-serve();
+sequelize.sync().then(async () => {
+  serve();
+});

@@ -1,36 +1,25 @@
-const users = {
-  1: {
-    id: '1',
-    email: 'me@pauljaworski.com',
-    password: 'lolwut2019',
-    firstName: 'Paul',
-    lastName: 'Jaworski',
-    productIds: [1],
-  },
-  2: {
-    id: '2',
-    email: 'fake@example.com',
-    password: 'fakepw2019',
-    firstName: 'fake',
-    lastName: 'user',
-    productIds: [2],
-  },
+import Sequelize from 'sequelize';
+
+const sequelize = new Sequelize(
+  process.env.DATABASE,
+  process.env.DATABASE_USER,
+  process.env.DATABASE_PASSWORD,
+  {
+    dialect: 'postgres',
+  }
+);
+
+const models = {
+  User: sequelize.import('./user'),
+  Product: sequelize.import('./product'),
 };
 
-const products = {
-  1: {
-    id: '1',
-    title: 'Tree Cap',
-    userId: '1',
-  },
-  2: {
-    id: '2',
-    title: '20oz Watter Bottle',
-    userId: '2',
-  },
-};
+Object.keys(models).forEach(key => {
+  if ('associate' in models[key]) {
+    models[key].associate(models);
+  }
+});
 
-export default {
-  users,
-  products,
-};
+export { sequelize };
+
+export default models;
