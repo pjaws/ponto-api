@@ -6,10 +6,19 @@ export default gql`
     user(id: ID!): User
     me: User
   }
+
+  extend type Mutation {
+    register(email: String!, password: String!): Token!
+    login(email: String!, password: String!): Token!
+  }
+
+  type Token {
+    token: String!
+  }
+
   type User {
     id: ID!
     email: String!
-    password: String!
     products: [Product!]
   }
 `;
