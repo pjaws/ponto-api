@@ -1,37 +1,24 @@
-import uuidv4 from 'uuid/v4';
-
 export default {
   Query: {
-    products: (parents, args, { models }) => Object.values(models.products),
-    product: (parent, { id }, { models }) => models.products[id],
+    products: async (parents, args, { models, me }) =>
+      models.Product.findAll({
+        where: {
+          userId: me.id,
+        },
+      }),
+    product: async (parent, { id }, { models }) => models.Product.findByPk(id),
   },
   Mutation: {
-    createProduct: (parent, { title }, { me, models }) => {
-      const id = uuidv4();
-      const product = {
-        id,
-        title,
+    createProduct: async (parent, product, { me, models }) =>
+      models.Product.create({
+        ...product,
         userId: me.id,
-      };
-
-      // eslint-disable-next-line no-param-reassign
-      models.products[id] = product;
-      models.users[me.id].productIds.push(id);
-
-      return product;
-    },
-    deleteProduct: (parent, { id }, { models }) => {
-      const { [id]: product, ...rest } = models.products;
-
-      if (!product) return false;
-
-      // eslint-disable-next-line no-param-reassign
-      models.products = rest;
-
-      return true;
-    },
+      }),
+    deleteProduct: async (parent, { id }, { models }) =>
+      models.Product.destroy({ where: { id } }),
   },
   Product: {
-    user: (product, args, { models }) => models.users[product.userId],
+    user: async (product, args, { models }) =>
+      models.User.findByPk(product.userId),
   },
 };

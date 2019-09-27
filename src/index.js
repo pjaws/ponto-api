@@ -14,7 +14,10 @@ fastify.register(helmet);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: { models, me: models.users[1] },
+  context: async () => ({
+    models,
+    me: await models.User.findByLogin('paulmattjaws@gmail.com'),
+  }),
 });
 
 async function serve() {
@@ -22,6 +25,45 @@ async function serve() {
   await fastify.listen(3000);
 }
 
-sequelize.sync().then(async () => {
+const eraseDatabaseOnSync = true;
+
+const createUsersWithProducts = async () => {
+  await models.User.create(
+    {
+      email: 'paulmattjaws@gmail.com',
+      password: 'granolabar',
+      products: [
+        {
+          title: 'Granola Bar',
+          sku: 'GB-001',
+        },
+      ],
+    },
+    {
+      include: [models.Product],
+    }
+  );
+  await models.User.create(
+    {
+      email: 'fakeuser@example.com',
+      password: 'hotdog',
+      products: [
+        {
+          title: 'Rubber Hot Dog',
+          sku: 'RHD-001',
+        },
+      ],
+    },
+    {
+      include: [models.Product],
+    }
+  );
+};
+
+sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
+  if (eraseDatabaseOnSync) {
+    createUsersWithProducts();
+  }
+
   serve();
 });

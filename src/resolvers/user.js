@@ -1,11 +1,15 @@
 export default {
   Query: {
-    users: (parents, args, { models }) => Object.values(models.users),
-    user: (parent, { id }, { models }) => models.users[id],
-    me: (parent, args, { me }) => me,
+    users: async (parents, args, { models }) => models.User.findAll(),
+    user: async (parent, { id }, { models }) => models.User.findByPk(id),
+    me: async (parent, args, { models, me }) => models.User.findByPk(me.id),
   },
   User: {
-    products: (user, args, { models }) =>
-      Object.values(models.products).filter(p => p.userId === user.id),
+    products: async (user, args, { models }) =>
+      models.Product.findAll({
+        where: {
+          userId: user.id,
+        },
+      }),
   },
 };
