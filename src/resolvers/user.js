@@ -1,25 +1,27 @@
 import jwt from 'jsonwebtoken';
-import { AuthenticationError, UserInputError } from 'apollo-server';
+import { combineResolvers } from 'graphql-resolvers';
+import { AuthenticationError, UserInputError } from 'apollo-server-fastify';
+import { isAdmin } from './authorization';
 
 const TOKEN_EXPIRATION = '1d';
 
 const createToken = async (user, secret, expiresIn) => {
-  const { id, email, username } = user;
-  return jwt.sign({ id, email, username }, secret, { expiresIn });
+  const { id, email, role } = user;
+  return jwt.sign({ id, email, role }, secret, { expiresIn });
 };
 
 export default {
   Query: {
-    users: async (parent, args, { models }) => models.User.findAll(),
-    user: async (parent, { id }, { models }) => models.User.findByPk(id),
-    me: async (parent, args, { models, me }) => {
+    users: async (_, __, { models }) => models.User.findAll(),
+    user: async (_, { id }, { models }) => models.User.findByPk(id),
+    me: async (_, __, { models, me }) => {
       if (!me) return null;
 
       return models.User.findByPk(me.id);
     },
   },
   Mutation: {
-    register: async (parent, { email, password }, { models, secret }) => {
+    register: async (_, { email, password }, { models, secret }) => {
       const user = await models.User.create({
         email,
         password,
@@ -27,11 +29,11 @@ export default {
 
       return { token: createToken(user, secret, TOKEN_EXPIRATION) };
     },
-    login: async (parent, { email, password }, { models, secret }) => {
+    login: async (_, { email, password }, { models, secret }) => {
       const user = await models.User.findByEmail(email);
 
       if (!user) {
-        throw new UserInputError('No user found with this login credentials.');
+        throw new UserInputError('No user found with these credentials.');
       }
 
       const isValid = await user.validatePassword(password);
@@ -42,9 +44,12 @@ export default {
 
       return { token: createToken(user, secret, TOKEN_EXPIRATION) };
     },
+    deleteUser: combineResolvers(isAdmin, async (_, { id }, { models }) => {
+      return models.User.destroy({ where: { id } });
+    }),
   },
   User: {
-    products: async (user, args, { models }) =>
+    products: async (user, __, { models }) =>
       models.Product.findAll({
         where: {
           userId: user.id,

@@ -14,6 +14,7 @@ export default gql`
   type Product {
     id: ID!
     title: String!
+    sku: String!
     user: User!
     description: String
     shopifyId: Int

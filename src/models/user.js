@@ -43,6 +43,9 @@ const user = (sequelize, DataTypes) => {
     shopifyShopName: {
       type: DataTypes.STRING,
     },
+    role: {
+      type: DataTypes.ENUM(['ADMIN', 'USER']),
+    },
   });
 
   User.associate = models => {
