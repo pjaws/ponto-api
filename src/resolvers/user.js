@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { combineResolvers } from 'graphql-resolvers';
-import { AuthenticationError, UserInputError } from 'apollo-server-fastify';
+import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import { isAdmin } from './authorization';
 
 const TOKEN_EXPIRATION = '1d';

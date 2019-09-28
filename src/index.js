@@ -1,16 +1,18 @@
 import 'dotenv/config';
-import cors from 'fastify-cors';
-import helmet from 'fastify-helmet';
-import { ApolloServer, AuthenticationError } from 'apollo-server-fastify';
+import http from 'http';
+import cors from 'cors';
+import helmet from 'helmet';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
+import express from 'express';
 import jwt from 'jsonwebtoken';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import models, { sequelize } from './models';
 
-const fastify = require('fastify')({ logger: true });
+const app = express();
 
-fastify.register(cors);
-fastify.register(helmet);
+app.use(cors());
+app.use(helmet());
 
 const getMe = async req => {
   const token = req.headers['x-token'];
@@ -31,7 +33,11 @@ const getMe = async req => {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: async ({ req }) => {
+  context: async ({ req, connection }) => {
+    if (connection) {
+      return { models };
+    }
+
     const me = await getMe(req);
     return {
       models,
@@ -41,10 +47,10 @@ const server = new ApolloServer({
   },
 });
 
-async function serve() {
-  fastify.register(server.createHandler());
-  await fastify.listen(3000);
-}
+server.applyMiddleware({ app });
+
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
 
 const eraseDatabaseOnSync = true;
 
@@ -88,5 +94,12 @@ sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
     createUsersWithProducts();
   }
 
-  serve();
+  httpServer.listen({ port: process.env.PORT }, () => {
+    console.log(
+      `🚀 Server ready at http://localhost:${process.env.PORT}${server.graphqlPath}`
+    );
+    console.log(
+      `🚀 Subscriptions ready at ws://localhost:${process.env.PORT}${server.subscriptionsPath}`
+    );
+  });
 });
