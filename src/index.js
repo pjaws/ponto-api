@@ -52,11 +52,10 @@ server.applyMiddleware({ app });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-const eraseDatabaseOnSync = true;
-
 const createUsersWithProducts = async () => {
   await models.User.create(
     {
+      id: '04c24519-51d9-4197-9579-d536d38d2887',
       email: 'paulmattjaws@gmail.com',
       password: 'granolabar',
       role: 'ADMIN',
@@ -73,6 +72,7 @@ const createUsersWithProducts = async () => {
   );
   await models.User.create(
     {
+      id: 'CC16DF49-7FCD-461C-BA8F-B9F3064FDD78',
       email: 'fakeuser@example.com',
       password: 'hotdogs',
       role: 'USER',
@@ -89,8 +89,10 @@ const createUsersWithProducts = async () => {
   );
 };
 
-sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
-  if (eraseDatabaseOnSync) {
+const isTest = !!process.env.TEST_DATABASE;
+
+sequelize.sync({ force: isTest }).then(async () => {
+  if (isTest) {
     createUsersWithProducts();
   }
 

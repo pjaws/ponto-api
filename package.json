@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node src/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --exec babel-node src/",
+    "test": "mocha --require @babel/register 'src/**/*.spec.js'",
+    "test-server": "TEST_DATABASE=ponto_test npm start"
   },
   "keywords": [],
   "author": "",
@@ -31,13 +32,16 @@
     "@babel/core": "^7.6.2",
     "@babel/node": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
+    "axios": "^0.19.0",
     "babel-preset-airbnb": "^4.0.1",
+    "chai": "^4.2.0",
     "eslint": "^6.4.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.3.0",
     "eslint-plugin-import": "^2.18.2",
     "husky": "^3.0.5",
     "lint-staged": "^9.3.0",
+    "mocha": "^6.2.0",
     "nodemon": "^1.19.2",
     "prettier": "1.18.2"
   },
