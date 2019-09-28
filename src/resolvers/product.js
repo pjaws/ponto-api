@@ -75,7 +75,6 @@ export default {
     },
   },
   Product: {
-    user: async (product, __, { models }) =>
-      models.User.findByPk(product.userId),
+    user: async (product, __, { loaders }) => loaders.user.load(product.userId),
   },
 };

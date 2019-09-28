@@ -5,9 +5,11 @@ import helmet from 'helmet';
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import DataLoader from 'dataloader';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import models, { sequelize } from './models';
+import loaders from './loaders';
 
 const app = express();
 
@@ -35,7 +37,12 @@ const server = new ApolloServer({
   resolvers,
   context: async ({ req, connection }) => {
     if (connection) {
-      return { models };
+      return {
+        models,
+        loaders: {
+          user: new DataLoader(keys => loaders.user.batchUsers(keys, models)),
+        },
+      };
     }
 
     const me = await getMe(req);
@@ -43,6 +50,9 @@ const server = new ApolloServer({
       models,
       me,
       secret: process.env.SECRET,
+      loaders: {
+        user: new DataLoader(keys => loaders.user.batchUsers(keys, models)),
+      },
     };
   },
 });
