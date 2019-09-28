@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-fastify';
+import { gql } from 'apollo-server-express';
 
 export default gql`
   extend type Query {
@@ -7,8 +7,16 @@ export default gql`
   }
 
   extend type Mutation {
-    createProduct(title: String!): Product!
+    createProduct(title: String!, sku: String!): Product!
     deleteProduct(id: ID!): Boolean!
+  }
+
+  extend type Subscription {
+    productCreated: ProductCreated!
+  }
+
+  type ProductCreated {
+    product: Product!
   }
 
   type ProductConnection {

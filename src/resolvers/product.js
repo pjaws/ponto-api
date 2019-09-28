@@ -1,7 +1,8 @@
-import { ForbiddenError } from 'apollo-server-fastify';
+import { ForbiddenError } from 'apollo-server-express';
 import { combineResolvers } from 'graphql-resolvers';
 import Sequelize from 'sequelize';
 import { isAuthenticated, isProductOwner } from './authorization';
+import pubsub, { EVENTS } from '../subscriptions';
 
 const toCursorHash = string => Buffer.from(string).toString('base64');
 const fromCursorHash = string =>
@@ -47,13 +48,19 @@ export default {
   Mutation: {
     createProduct: combineResolvers(
       isAuthenticated,
-      async (_, product, { me, models }) => {
+      async (_, args, { me, models }) => {
         if (!me) throw new ForbiddenError('Not authenticated.');
 
-        return models.Product.create({
-          ...product,
+        const product = await models.Product.create({
+          ...args,
           userId: me.id,
         });
+
+        pubsub.publish(EVENTS.PRODUCT.CREATED, {
+          productCreated: { product },
+        });
+
+        return product;
       }
     ),
     deleteProduct: combineResolvers(
@@ -61,6 +68,11 @@ export default {
       isProductOwner,
       async (_, { id }, { models }) => models.Product.destroy({ where: { id } })
     ),
+  },
+  Subscription: {
+    productCreated: {
+      subscribe: () => pubsub.asyncIterator(EVENTS.PRODUCT.CREATED),
+    },
   },
   Product: {
     user: async (product, __, { models }) =>
