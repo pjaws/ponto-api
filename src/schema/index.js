@@ -3,6 +3,8 @@ import userSchema from './user';
 import productSchema from './product';
 
 const linkSchema = gql`
+  scalar Date
+
   type Query {
     _: Boolean
   }

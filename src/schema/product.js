@@ -16,6 +16,8 @@ export default gql`
     title: String!
     sku: String!
     user: User!
+    createdAt: Date
+    updatedAt: Date
     description: String
     shopifyId: Int
     tags: [String]
