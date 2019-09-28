@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec babel-node src/",
+    "build": "babel src -d dist",
+    "start": "npm run build && node dist/",
+    "dev": "nodemon --exec babel-node src/",
     "test": "mocha --require @babel/register 'src/**/*.spec.js'",
     "test-server": "TEST_DATABASE=ponto_test npm start"
   },
