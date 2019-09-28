@@ -1,16 +1,48 @@
 import { ForbiddenError } from 'apollo-server-fastify';
 import { combineResolvers } from 'graphql-resolvers';
+import Sequelize from 'sequelize';
 import { isAuthenticated, isProductOwner } from './authorization';
+
+const toCursorHash = string => Buffer.from(string).toString('base64');
+const fromCursorHash = string =>
+  Buffer.from(string, 'base64').toString('ascii');
 
 export default {
   Query: {
-    products: async (_, __, { models, me }) =>
-      models.Product.findAll({
-        where: {
-          userId: me.id,
+    products: async (_, { cursor, limit = 100 }, { models, me }) => {
+      const cursorOpts = cursor
+        ? {
+            where: {
+              createdAt: {
+                [Sequelize.Op.lt]: fromCursorHash(cursor),
+              },
+              userId: me.id,
+            },
+          }
+        : { where: { userId: me.id } };
+
+      const products = await models.Product.findAll({
+        order: [['createdAt', 'DESC']],
+        limit: limit + 1,
+        ...cursorOpts,
+      });
+
+      const hasNextPage = products.length > limit;
+      const edges = hasNextPage ? products.slice(0, -1) : products;
+
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: toCursorHash(edges[edges.length - 1].createdAt.toString()),
         },
-      }),
-    product: async (_, { id }, { models }) => models.Product.findByPk(id),
+      };
+    },
+    product: combineResolvers(
+      isAuthenticated,
+      isProductOwner,
+      async (_, { id }, { models }) => models.Product.findByPk(id)
+    ),
   },
   Mutation: {
     createProduct: combineResolvers(
