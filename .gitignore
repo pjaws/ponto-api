@@ -90,3 +90,6 @@ public
 
 # DynamoDB Local files
 .dynamodb/
+
+# Project Build
+dist/
