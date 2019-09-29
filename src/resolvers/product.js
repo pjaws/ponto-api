@@ -63,6 +63,21 @@ export default {
         return product;
       }
     ),
+    updateProduct: combineResolvers(
+      isAuthenticated,
+      isProductOwner,
+      async (_, { id, ...updates }, { models }) => {
+        const product = await models.Product.findByPk(id);
+
+        await product.update(updates);
+
+        pubsub.publish(EVENTS.PRODUCT.UPDATED, {
+          productUpdated: { product },
+        });
+
+        return product;
+      }
+    ),
     deleteProduct: combineResolvers(
       isAuthenticated,
       isProductOwner,
@@ -72,6 +87,9 @@ export default {
   Subscription: {
     productCreated: {
       subscribe: () => pubsub.asyncIterator(EVENTS.PRODUCT.CREATED),
+    },
+    productUpdated: {
+      subscribe: () => pubsub.asyncIterator(EVENTS.PRODUCT.UPDATED),
     },
   },
   Product: {

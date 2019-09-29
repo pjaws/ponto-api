@@ -7,15 +7,38 @@ export default gql`
   }
 
   extend type Mutation {
-    createProduct(title: String!, sku: String!): Product!
+    createProduct(
+      title: String!
+      sku: String!
+      description: String
+      price: Float
+      shopifyId: Int
+      type: String
+      vendor: String
+    ): Product!
+    updateProduct(
+      id: ID!
+      title: String
+      sku: String
+      description: String
+      price: Float
+      shopifyId: Int
+      type: String
+      vendor: String
+    ): Product!
     deleteProduct(id: ID!): Boolean!
   }
 
   extend type Subscription {
     productCreated: ProductCreated!
+    productUpdated: ProductUpdated!
   }
 
   type ProductCreated {
+    product: Product!
+  }
+
+  type ProductUpdated {
     product: Product!
   }
 
