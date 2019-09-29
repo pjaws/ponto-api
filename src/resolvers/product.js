@@ -1,4 +1,3 @@
-import { ForbiddenError } from 'apollo-server-express';
 import { combineResolvers } from 'graphql-resolvers';
 import Sequelize from 'sequelize';
 import { isAuthenticated, isProductOwner } from './authorization';
@@ -49,8 +48,6 @@ export default {
     createProduct: combineResolvers(
       isAuthenticated,
       async (_, args, { me, models }) => {
-        if (!me) throw new ForbiddenError('Not authenticated.');
-
         const product = await models.Product.create({
           ...args,
           userId: me.id,
