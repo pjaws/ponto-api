@@ -24,7 +24,7 @@
     "graphql-iso-date": "^3.6.1",
     "graphql-resolvers": "^0.3.3",
     "helmet": "^3.21.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^1.6.0",
     "pg": "^7.12.1",
     "pm2": "^3.5.1",
